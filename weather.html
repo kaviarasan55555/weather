@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <title>Country Weather</title>
+  <style>
+  .card {
+    background-color: rgb(61, 105, 185); 
+    
+  }</style>
+  <style>
+  .card-header { background-color: rgb(63, 52, 52);
+    color: aliceblue;
+
+  }
+  
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Country Weather</h1>
+    <div id="cardsContainer" class="row"></div>
+  </div>
+
+  <script>
+    function fetchCountryData() {
+      fetch('https://restcountries.com/v3/all')
+        .then(response => response.json())
+        .then(data => {
+          const countryCards = document.getElementById('cardsContainer');
+          data.forEach(country => {
+            
+            const card = document.createElement('div');
+            card.classList.add('card', 'col-lg-4', 'col-sm-12', 'mb-3');
+    
+            
+           
+            card.setAttribute('data-lat', country.latlng[0]);
+            card.setAttribute('data-lon', country.latlng[1]);
+    
+            
+            const cardHeader = document.createElement('div');
+            cardHeader.classList.add('card-header');
+            cardHeader.textContent = country.name.common;
+    
+            
+            const cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+    
+            const capital = document.createElement('h5');
+            capital.classList.add('card-title');
+            capital.textContent = `Capital: ${country.capital?.[0] || 'N/A'}`;
+    
+            
+            const latLng = document.createElement('p');
+            latLng.classList.add('card-text');
+            latLng.textContent = `Latlng: ${country.latlng?.join(', ') || 'N/A'}`;
+    
+            
+            const flag = document.createElement('img');
+            flag.classList.add('card-img-top');
+            flag.src = `https://flagcdn.com/${country.cca2.toLowerCase()}.svg`;
+            flag.alt = 'Country Flag';
+    
+            
+            const regionCode = document.createElement('p');
+            regionCode.classList.add('card-text');
+            regionCode.textContent = `Region: ${country.region}, Country Code: ${country.cca2}`;
+    
+            
+            const weatherBtn = document.createElement('button');
+            weatherBtn.classList.add('btn', 'btn-primary');
+            weatherBtn.textContent = 'Click for Weather';
+            weatherBtn.addEventListener('click', () => {
+              const lat = country.latlng[0];
+              const lon = country.latlng[1];
+              const countryCode = country.cca2;
+              fetchWeatherData(lat, lon, weatherBtn);
+              
+            });
+    
+           
+            cardBody.appendChild(capital);
+            cardBody.appendChild(latLng);
+            cardBody.appendChild(regionCode);
+            cardBody.appendChild(weatherBtn);
+    
+            
+            card.appendChild(cardHeader);
+            card.appendChild(flag);
+            card.appendChild(cardBody);
+    
+           
+            countryCards.appendChild(card);
+          });
+        })
+        .catch(error => console.log(error));
+    }
+    
+    
+    function fetchWeatherData(lat, lon, weatherBtn) {
+      const apiKey = 'd9ccc11ef9a03796def0f1c6a39f9f4d'; 
+    
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+    
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          
+          const weatherDescription = data.weather[0].description;
+          const temperature = Math.round(data.main.temp - 273.15);
+          setTimeout(() => {
+            weatherBtn.textContent = 'Click for Weather';
+          }, 3000);
+    
+          
+          weatherBtn.textContent = `Weather: ${weatherDescription}, Temperature: ${temperature}°C`;
+        })
+        .catch(error => console.log(error));
+    }
+    
+    
+    fetchCountryData();</script>
+</body>
+
+</html>
